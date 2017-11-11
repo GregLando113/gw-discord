@@ -160,23 +160,18 @@ gw_decodestringasync(void* encode, gwDecodeStringCallback_t* callback, void* arg
 void 
 gw_encodestringid(unsigned id, unsigned short words[])
 {
-	unsigned count = 0;
-	if ((id & 0xffff8000) > 0)
+	if (id > 0x7f00)
 	{
-		while (id > 0x7f00)
-		{
-			words[count] += (id / 0x7f00);
-			words[count + 1] += id % 0x7f00 + 0x100;
-			id >>= 14;
-			id++;
-		}
-		words[0] = words[0] & 0x8000;
+		unsigned short count = id / 0x7f00;
+		id -= 0x7f00 * count;
+		words[0] = 0x8100 + count;
+		words[1] = id + 0x100;
 	}
 	else
 	{
-		words[0] = id;
+		words[0] = id + 0x100;
+		words[1] = 0;
 	}
-	words[count] += 0x100;
 }
 
 struct gwMsgConn*

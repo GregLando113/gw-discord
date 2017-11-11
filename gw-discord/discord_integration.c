@@ -1,6 +1,8 @@
 #include "discord_integration.h"
 
 #include <discord-rpc.h>
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 #include "gwdata.h"
 #include "base64.h"
@@ -95,6 +97,12 @@ gwdiscord_initialize(void* p)
 	handlers.joinGame     = discord_onjoingame;
 
 	gw_initgamesrv();
+
+	while (!gw_gamesrv())
+	{
+		Sleep(32);
+	}
+
 	Discord_Initialize(DISCORD_APP_ID, &handlers, 1, NULL);
 
 	oMsg33 = gw_setmsghandler(gw_gamesrv(), 23, msg33_callback);
