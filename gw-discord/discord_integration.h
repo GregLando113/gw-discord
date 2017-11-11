@@ -5,5 +5,5 @@
 
 
 
-int  gwdiscord_initialize(void);
+int  __stdcall gwdiscord_initialize(void* p);
 void gwdiscord_deinitialize(void);

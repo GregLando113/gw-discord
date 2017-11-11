@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
-    <Filter Include="discord-rpc">
-      <UniqueIdentifier>{6d2452fc-248f-4371-b041-630fdc487e87}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="discord_integration.c">
@@ -29,21 +26,6 @@
     </ClCompile>
     <ClCompile Include="memory.c">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\discord-rpc\src\serialization.cpp">
-      <Filter>discord-rpc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\discord-rpc\src\connection_win.cpp">
-      <Filter>discord-rpc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\discord-rpc\src\discord_register_win.cpp">
-      <Filter>discord-rpc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\discord-rpc\src\discord-rpc.cpp">
-      <Filter>discord-rpc</Filter>
-    </ClCompile>
-    <ClCompile Include="..\discord-rpc\src\rpc_connection.cpp">
-      <Filter>discord-rpc</Filter>
     </ClCompile>
     <ClCompile Include="base64.c">
       <Filter>Source Files</Filter>
@@ -65,5 +47,10 @@
     <ClInclude Include="base64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\discord-rpc\lib\discord-rpc.lib">
+      <Filter>Source Files</Filter>
+    </Library>
   </ItemGroup>
 </Project>

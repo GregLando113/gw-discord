@@ -99,11 +99,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\discord-rpc\src\connection_win.cpp" />
-    <ClCompile Include="..\discord-rpc\src\discord-rpc.cpp" />
-    <ClCompile Include="..\discord-rpc\src\discord_register_win.cpp" />
-    <ClCompile Include="..\discord-rpc\src\rpc_connection.cpp" />
-    <ClCompile Include="..\discord-rpc\src\serialization.cpp" />
     <ClCompile Include="base64.c" />
     <ClCompile Include="discord_integration.c" />
     <ClCompile Include="gwdata.c" />
@@ -116,6 +111,9 @@
     <ClInclude Include="discord_integration.h" />
     <ClInclude Include="gwdata.h" />
     <ClInclude Include="memory.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\discord-rpc\lib\discord-rpc.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

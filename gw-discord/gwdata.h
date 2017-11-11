@@ -5,6 +5,8 @@
 
 #include <wchar.h>
 
+#define STATIC_ASSERT()
+
 struct vec2f
 {
     float x, y, z;
@@ -15,7 +17,7 @@ struct vec3f
     float x, y, z;
 };
 
-struct gw_array
+struct _gw_array
 {
 	void* data;
 	unsigned cap;
@@ -23,8 +25,7 @@ struct gw_array
 	unsigned growth;
 };
 
-#define gw_array_idx(type, array, idx)    (((type*)(array).data)[idx])
-#define gw_array_idxptr(type, array, idx) ((type*)(array).data + idx)
+#define gw_array(T) struct { T* data; unsigned cap; unsigned size; unsigned growth; }
 
 struct gwAgentContext;
 struct gwMapContext;
@@ -38,52 +39,52 @@ struct gwTradeContext;
 struct gwWorldContext 
 {
     /* +h0000 */ wchar_t** name;
-    /* +h0004 */ struct gw_array message_buff;
+    /* +h0004 */ struct _gw_array message_buff;
     /* +h0014 */ char h0014[0x10];
-    /* +h0024 */ struct gw_array merchitems;
+    /* +h0024 */ struct _gw_array merchitems;
     /* +h0034 */ char h0034[0x48];
-    /* +h007C */ struct gw_array mapagents;
+    /* +h007C */ struct _gw_array mapagents;
     /* +h008C */ char h008C[0x10];
     /* +h009C */ struct vec3f all_flag;
     /* +h00A8 */ char h00A8[0x4];
-    /* +h00AC */ struct gw_array attributes;
+    /* +h00AC */ struct _gw_array attributes;
     /* +h00BC */ char h00BC[0x3FC];
-    /* +h04B8 */ struct gw_array h04B8;
-    /* +h04C8 */ struct gw_array h04C8;
+    /* +h04B8 */ struct _gw_array h04B8;
+    /* +h04C8 */ struct _gw_array h04C8;
     /* +h04D8 */ char h04D8[0x4];
-    /* +h04DC */ struct gw_array h04DC;
+    /* +h04DC */ struct _gw_array h04DC;
     /* +h04EC */ char h04EC[0x1C];
-    /* +h0508 */ struct gw_array partyeffects;
-    /* +h0518 */ struct gw_array h0518;
+    /* +h0508 */ struct _gw_array partyeffects;
+    /* +h0518 */ struct _gw_array h0518;
     /* +h0528 */ unsigned activequestid;
-    /* +h052C */ struct gw_array questlog;
+    /* +h052C */ struct _gw_array questlog;
     /* +h053C */ char h053C[0x38];
-    /* +h0574 */ struct gw_array h0574; // Seems like agent/item ids (only appears in outpost?)
-    /* +h0584 */ struct gw_array hero_flags;
-    /* +h0594 */ struct gw_array h0594;
-    /* +h05A4 */ struct gw_array h05A4; // Struct size = 0x20
+    /* +h0574 */ struct _gw_array h0574; // Seems like agent/item ids (only appears in outpost?)
+    /* +h0584 */ struct _gw_array hero_flags;
+    /* +h0594 */ struct _gw_array h0594;
+    /* +h05A4 */ struct _gw_array h05A4; // Struct size = 0x20
     /* +h05B4 */ unsigned h05B4[2];
-    /* +h05BC */ struct gw_array h05BC;
-    /* +h05CC */ struct gw_array h05CC;
-    /* +h05DC */ struct gw_array h05DC;
-    /* +h05EC */ struct gw_array h05EC;
-    /* +h05FC */ struct gw_array h05FC;
-    /* +h060C */ struct gw_array h060C;
+    /* +h05BC */ struct _gw_array h05BC;
+    /* +h05CC */ struct _gw_array h05CC;
+    /* +h05DC */ struct _gw_array h05DC;
+    /* +h05EC */ struct _gw_array h05EC;
+    /* +h05FC */ struct _gw_array h05FC;
+    /* +h060C */ struct _gw_array h060C;
     /* +h061C */ unsigned h061C[4];
-    /* +h062C */ struct gw_array h062C;
+    /* +h062C */ struct _gw_array h062C;
     /* +h063C */ char h063C[0x44];
-    /* +h0680 */ struct gw_array h0680; // Struct size = 0x138 i think, has a vtable
+    /* +h0680 */ struct _gw_array h0680; // Struct size = 0x138 i think, has a vtable
     /* +h0690 */ unsigned salvagesessionid;
     /* +h0694 */ unsigned h0694[0xA];
-    /* +h06BC */ struct gw_array h06BC;
-    /* +h06CC */ struct gw_array h06CC;
+    /* +h06BC */ struct _gw_array h06BC;
+    /* +h06CC */ struct _gw_array h06CC;
     /* +h06DC */ unsigned h06DC;
-    /* +h06E0 */ struct gw_array h06E0;
-    /* +h06F0 */ struct gw_array skillbar;
-    /* +h0700 */ struct gw_array h0700;
-    /* +h0710 */ struct gw_array h0710;
-    /* +h0720 */ struct gw_array h0720;
-    /* +h0730 */ struct gw_array h0730;
+    /* +h06E0 */ struct _gw_array h06E0;
+    /* +h06F0 */ struct _gw_array skillbar;
+    /* +h0700 */ struct _gw_array h0700;
+    /* +h0710 */ struct _gw_array h0710;
+    /* +h0720 */ struct _gw_array h0720;
+    /* +h0730 */ struct _gw_array h0730;
     /* +h0740 */ unsigned experience;
     /* +h0744 */ unsigned experience_dupe;
     /* +h0748 */ unsigned currentkurzick;
@@ -119,12 +120,12 @@ struct gwWorldContext
     /* +h07C0 */ unsigned maxbalth;
     /* +h07C4 */ unsigned maximperial;
     /* +h07C8 */ unsigned unk6;
-    /* +h07CC */ struct gw_array agentInfos;
-    /* +h07DC */ struct gw_array unk24_array;
-    /* +h07EC */ struct gw_array missionmapicons;
-    /* +h07FC */ struct gw_array npcs;
-    /* +h080C */ struct gw_array players;
-    /* +h081C */ struct gw_array titles;
+    /* +h07CC */ struct _gw_array agentInfos;
+    /* +h07DC */ struct _gw_array unk24_array;
+    /* +h07EC */ struct _gw_array missionmapicons;
+    /* +h07FC */ struct _gw_array npcs;
+    /* +h080C */ struct _gw_array players;
+    /* +h081C */ struct _gw_array titles;
     /* +h082C */ char pad9[0x20];
     /* +h084C */ unsigned foes_killed;
     /* +h0850 */ unsigned foes_to_kill;
@@ -133,16 +134,16 @@ struct gwWorldContext
 
 struct gwCharContext 
 { // total: 0x03A8
-    /* +h0000 */ struct gw_array h0000;
+    /* +h0000 */ struct _gw_array h0000;
     /* +h0010 */ char h0010[4];
-    /* +h0014 */ struct gw_array h0014;
+    /* +h0014 */ struct _gw_array h0014;
     /* +h0024 */ char h0024[0x10];
-    /* +h0034 */ struct gw_array h0034;
-    /* +h0044 */ struct gw_array h0044;
+    /* +h0034 */ struct _gw_array h0034;
+    /* +h0044 */ struct _gw_array h0044;
     /* +h0054 */ char h0054[0x20];
     /* +h0074 */ wchar_t playername[20];
     /* +h009C */ char h009C[0x50];
-    /* +h00EC */ struct gw_array h00EC;
+    /* +h00EC */ struct _gw_array h00EC;
     /* +h00FC */ char h00FC[0x28];
     /* +h0124 */ unsigned h0124;
     /* +h0128 */ unsigned token2; // player unique id in the world
@@ -154,7 +155,7 @@ struct gwCharContext
     /* +h01BC */ unsigned currentmapid;
     /* +h01C0 */ unsigned currentmapid_dupe;
     /* +h01C4 */ char h01C4[0x8];
-    /* +h01CC */ struct gw_array ObserverMatchs;
+    /* +h01CC */ struct _gw_array ObserverMatchs;
     /* +h01DC */ char h001DC[0x14C];
     /* +h0328 */ wchar_t playeremail[64];
 };
@@ -186,16 +187,16 @@ struct gwHenchmanPartyMember { // total: 0x34/52
 struct gwPartyInfo 
 { // total: 0x44/68
     /* +h0000 */ unsigned h0000;
-    /* +h0004 */ struct gw_array players;
-    /* +h0014 */ struct gw_array henchmen;
-    /* +h0024 */ struct gw_array heroes;
-    /* +h0034 */ struct gw_array others; // agent id of allies, minions, pets.
+    /* +h0004 */ gw_array(struct gwPlayerPartyMember) players;
+    /* +h0014 */ gw_array(struct gwHenchmanPartyMember) henchmen;
+    /* +h0024 */ gw_array(struct gwHeroPartyMember) heroes;
+    /* +h0034 */ gw_array(unsigned) others; // agent id of allies, minions, pets.
 };
 
 struct gwPartyContext 
 { // total: 0x58/88
     /* +h0000 */ unsigned h0000;
-    /* +h0004 */ struct gw_array h0004;
+    /* +h0004 */ struct _gw_array h0004;
     /* +h0014 */ unsigned flag;
     /* +h0018 */ unsigned h0018[4];
     /* +h0028 */ unsigned InviteCount;
@@ -239,8 +240,9 @@ struct gwAreaInfo
     /* +h000C */ unsigned Type;
     /* +h0010 */ unsigned Flags;
     /* +h0014 */ unsigned thumbnailid;
-    /* +h0018 */ unsigned maxpartysize;
-    /* +h001C */ unsigned h001C[9];
+	/* +h0018 */ unsigned unk1;
+    /* +h001C */ unsigned maxpartysize;
+    /* +h0020 */ unsigned h001C[8];
     /* +h0040 */ unsigned x; // icon position on map.
     /* +h0044 */ unsigned y;
     /* +h0048 */ unsigned h0048[11];
@@ -280,8 +282,8 @@ struct gwMsgConn
     struct __protocol
     {
         char pad[0x1C];
-        struct gw_array ctos;
-        struct gw_array stoc;
+        gw_array(struct gwCtoSMsgProtocol) ctos;
+		gw_array(struct gwStoCMsgProtocol) stoc;
     } *protocol;
     char pad2[0x94 - 0xC];
     struct rc4cipher outbound;
@@ -306,3 +308,4 @@ gwMsgHandler_t*         gw_setmsghandler(struct gwMsgConn* conn, unsigned op, gw
 
 typedef void __fastcall gwDecodeStringCallback_t(void* arg,wchar_t* str);
 int                     gw_decodestringasync(void* encode, gwDecodeStringCallback_t* callback, void* arg);
+void                    gw_encodestringid(unsigned id, unsigned short words[]);

@@ -32,13 +32,3 @@ unsigned int b64_encode(const unsigned int* in, unsigned int in_len, unsigned ch
 // out : pointer to buffer with enough memory, user is responsible for memory allocation, receives "raw" binary
 // returns size of output excluding null byte
 unsigned int b64_decode(const unsigned char* in, unsigned int in_len, unsigned int* out);
-
-// file-version b64_encode
-// Input : filenames
-// returns size of output
-unsigned int b64_encodef(char *InFile, char *OutFile);
-
-// file-version b64_decode
-// Input : filenames
-// returns size of output
-unsigned int b64_decodef(char *InFile, char *OutFile);

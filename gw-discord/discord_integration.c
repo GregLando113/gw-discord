@@ -13,23 +13,27 @@ DiscordRichPresence g_presence = { 0 };
 
 
 
-void __fastcall discord_decodestrcallback(void* data, wchar_t* str)
+void __fastcall 
+discord_decodestrcallback(void* data, wchar_t* str)
 {
-	char* b = g_statebuffer;
+	memset(g_detailbuffer, 0, 128);
+	char* b = g_detailbuffer;
 	for (; *str; ++b, ++str)
 		*b = *str;
 	Discord_UpdatePresence(&g_presence);
 }
 
 
-int getpartysize(struct gwGameContext* ctx)
+int 
+getpartysize(struct gwGameContext* ctx)
 {
 	struct gwPartyInfo* p = ctx->party->partyinfo;
 	return p->players.size + p->heroes.size + p->henchmen.size;
 }
 
 gwMsgHandler_t* oMsg33 = 0;
-int __fastcall msg33_callback(void* cb)
+int __fastcall 
+msg33_callback(void* cb)
 {
 	struct gwGameContext* ctx = gw_gamecontext();
 	
@@ -40,10 +44,13 @@ int __fastcall msg33_callback(void* cb)
 	struct gwAreaInfo* mapinfo = gw_areainfo(mapid);
 
 	g_presence.partyMax = mapinfo->maxpartysize;
-	g_presence.partySize = getpartysize(ctx);
-	strcpy(g_detailbuffer, (ctx->character->is_explorable) ? "In Explorable" : "In Outpost");
+	//g_presence.partySize = getpartysize(ctx);
+	strcpy(g_statebuffer, (ctx->character->is_explorable) ? "In Explorable" : "In Outpost");
 
-	gw_decodestringasync(mapinfo->nameid, discord_decodestrcallback, NULL);
+
+	unsigned short encstr[4] = { 0 };
+	gw_encodestringid(mapinfo->nameid, encstr);
+	gw_decodestringasync(encstr, discord_decodestrcallback, NULL);
 
 end:
 	return oMsg33(cb);
@@ -73,8 +80,8 @@ discord_onjoingame(const char* joinsecret)
 
 }
 
-int  
-gwdiscord_initialize(void)
+int __stdcall
+gwdiscord_initialize(void* p)
 {
 
 	g_presence.state = g_statebuffer;
@@ -90,12 +97,12 @@ gwdiscord_initialize(void)
 	gw_initgamesrv();
 	Discord_Initialize(DISCORD_APP_ID, &handlers, 1, NULL);
 
-	oMsg33 = gw_setmsghandler(gw_gamesrv(), 33, msg33_callback);
+	oMsg33 = gw_setmsghandler(gw_gamesrv(), 23, msg33_callback);
 }
 
 void 
 gwdiscord_deinitialize(void)
 {
-	gw_setmsghandler(gw_gamesrv(), 33, oMsg33);
+	gw_setmsghandler(gw_gamesrv(), 23, oMsg33);
 	Discord_Shutdown();
 }

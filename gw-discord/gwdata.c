@@ -59,7 +59,7 @@ gw_gamecontext(void)
 struct gwAreaInfo*
 gw_areainfo(unsigned mapid)
 {
-	static struct gwAreaInfo* ptr;
+	static struct gwAreaInfo* ptr = 0;
 	if(!ptr && !scanfor(GW_MODULE_BASE, GW_MODULE_SIZE,
 					"\x8B\xC6\xC1\xE0\x05\x2B\xC6\x5E\x8D", 
 					"xxxxxxxxx", 
@@ -130,8 +130,8 @@ gw_setmsghandler(struct gwMsgConn* conn, unsigned op, gwMsgHandler_t* handler)
 		return 0;
 	}
 
-	struct gw_array* stochandlers = &conn->protocol->stoc;
-	struct gwStoCMsgProtocol* proto = gw_array_idxptr(struct gwStoCMsgProtocol*, *stochandlers, op);
+	gw_array(struct gwStoCMsgProtocol)* stochandlers = &conn->protocol->stoc;
+	struct gwStoCMsgProtocol* proto = stochandlers->data + op;
 
 
 	gwMsgHandler_t* ohandler = proto->handler;
@@ -155,6 +155,28 @@ gw_decodestringasync(void* encode, gwDecodeStringCallback_t* callback, void* arg
 	}
 	__decodestr(encode, callback, arg);
 	return 1;
+}
+
+void 
+gw_encodestringid(unsigned id, unsigned short words[])
+{
+	unsigned count = 0;
+	if ((id & 0xffff8000) > 0)
+	{
+		while (id > 0x7f00)
+		{
+			words[count] += (id / 0x7f00);
+			words[count + 1] += id % 0x7f00 + 0x100;
+			id >>= 14;
+			id++;
+		}
+		words[0] = words[0] & 0x8000;
+	}
+	else
+	{
+		words[0] = id;
+	}
+	words[count] += 0x100;
 }
 
 struct gwMsgConn*
