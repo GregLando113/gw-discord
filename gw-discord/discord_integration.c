@@ -11,7 +11,39 @@
 
 char g_statebuffer[128];
 char g_detailbuffer[128];
+char g_largeimgkeybuffer[128];
 DiscordRichPresence g_presence = { 0 };
+
+const char* large_imgs[27] = 
+{
+	"region_kryta",
+	"region_maguuma",
+	"region_ascalon",
+	"region_shiverpeaks",
+	"region_ha",
+	"region_crystaldesert",
+	"region_fow",
+	"region_presearing",
+	"region_kaineng",
+	"region_kurz",
+	"region_lux",
+	"region_shingjea",
+	"region_kourna",
+	"region_vabbi",
+	"region_deso",
+	"region_istan",
+	"region_torment",
+	"region_tarnished",
+	"region_depths",
+	"region_farshivs",
+	"region_charrhomelands",
+	"region_battleisles",
+	"region_battlejahai",
+	"region_flightnorth",
+	"region_tenguaccords",
+	"region_whitemantle",
+	"region_swat"
+};
 
 
 
@@ -48,7 +80,7 @@ msg33_callback(void* cb)
 	g_presence.partyMax = mapinfo->maxpartysize;
 	//g_presence.partySize = getpartysize(ctx);
 	strcpy(g_statebuffer, (ctx->character->is_explorable) ? "In Explorable" : "In Outpost");
-
+	strcpy(g_largeimgkeybuffer, large_imgs[mapinfo->Region > 27 ? 0 : mapinfo->Region]);
 
 	unsigned short encstr[4] = { 0 };
 	gw_encodestringid(mapinfo->nameid, encstr);
@@ -88,6 +120,7 @@ gwdiscord_initialize(void* p)
 
 	g_presence.state = g_statebuffer;
 	g_presence.details = g_detailbuffer;
+	g_presence.largeImageKey = g_largeimgkeybuffer;
 
 	DiscordEventHandlers handlers;
 	memset(&handlers, 0, sizeof(handlers));
