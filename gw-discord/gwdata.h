@@ -151,7 +151,9 @@ struct gwCharContext
     /* +h0130 */ unsigned is_explorable;
     /* +h0134 */ char h0130[0x5C];
     /* +h0190 */ unsigned currentmapid_again;
-    /* +h0194 */ char h0194[0x28];
+    /* +h0194 */ char h0194[0x20];
+	/* +h01B4 */ unsigned district;
+	/* +h01B8 */ unsigned unk01B8;
     /* +h01BC */ unsigned currentmapid;
     /* +h01C0 */ unsigned currentmapid_dupe;
     /* +h01C4 */ char h01C4[0x8];
@@ -232,7 +234,7 @@ struct gwGameContext
     /* +h0058 */ struct gwTradeContext* trade;
 };
 
-struct gwAreaInfo 
+struct gwConstAreaInfo 
 { // total: 0x7C/120
     /* +h0000 */ unsigned h0000;
     /* +h0004 */ unsigned Continent;
@@ -290,6 +292,15 @@ struct gwMsgConn
     struct rc4cipher inbound;
 };
 
+struct gwDistrictInfo
+{
+	unsigned unk1;
+	unsigned unk2;
+	unsigned unk3;
+	unsigned language;
+	int      region;
+};
+
 
 // initialization
 
@@ -297,8 +308,9 @@ int                     gw_initgamesrv(void);
 
 // data
 struct gwGameContext*   gw_gamecontext(void);
-struct gwAreaInfo*      gw_areainfo(unsigned mapid);
+struct gwConstAreaInfo* gw_areainfo(unsigned mapid);
 struct gwMsgConn*       gw_gamesrv(void);
+struct gwDistrictInfo*  gw_districtinfo(void);
 
 // commands
 void                    gw_maptravel(unsigned mapid, unsigned region, unsigned language, unsigned district);

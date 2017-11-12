@@ -56,10 +56,10 @@ gw_gamecontext(void)
 }
 
 
-struct gwAreaInfo*
+struct gwConstAreaInfo*
 gw_areainfo(unsigned mapid)
 {
-	static struct gwAreaInfo* ptr = 0;
+	static struct gwConstAreaInfo* ptr = 0;
 	if(!ptr && !scanfor(GW_MODULE_BASE, GW_MODULE_SIZE,
 					"\x8B\xC6\xC1\xE0\x05\x2B\xC6\x5E\x8D", 
 					"xxxxxxxxx", 
@@ -182,4 +182,15 @@ gw_gamesrv(void)
 		return 0;
 	}
 	return g_getgamesrv();
+}
+
+struct gwDistrictInfo*
+gw_districtinfo(void)
+{
+	static struct gwDistrictInfo* ptr = 0;
+	if (!ptr && !scanfor(GW_MODULE_BASE, GW_MODULE_SIZE, "\xC3\x8B\x75\xFC\x8B\x04\xB5", "xxxxxxx", 7, 1, &ptr))
+	{
+		return 0;
+	}
+	return ptr;
 }

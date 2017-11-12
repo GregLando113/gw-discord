@@ -45,6 +45,29 @@ const char* large_imgs[27] =
 	"region_swat"
 };
 
+const char* map_regions[] = 
+{
+	"America",
+	"Asia Korean",
+	"Europe",
+	"Asia Chinese",
+	"Asia Japanese"
+};
+
+const char* map_languages[] =
+{
+	"English",
+	"Unknown",
+	"French",
+	"German",
+	"Italian",
+	"Spanish",
+	"Unknown",
+	"Unknown",
+	"Unknown",
+	"Polish",
+	"Russian"
+};
 
 
 void __fastcall 
@@ -62,6 +85,7 @@ int
 getpartysize(struct gwGameContext* ctx)
 {
 	struct gwPartyInfo* p = ctx->party->partyinfo;
+	if (!p) return 0;
 	return p->players.size + p->heroes.size + p->henchmen.size;
 }
 
@@ -75,11 +99,36 @@ msg33_callback(void* cb)
 		goto end;
 
 	unsigned mapid = ctx->character->currentmapid;
-	struct gwAreaInfo* mapinfo = gw_areainfo(mapid);
+	struct gwConstAreaInfo* mapinfo = gw_areainfo(mapid);
+	
 
 	g_presence.partyMax = mapinfo->maxpartysize;
 	//g_presence.partySize = getpartysize(ctx);
-	strcpy(g_statebuffer, (ctx->character->is_explorable) ? "In Explorable" : "In Outpost");
+	if (ctx->character->is_explorable)
+	{
+		strcpy(g_statebuffer, "In Explorable");
+	}
+	else
+	{
+		struct gwDistrictInfo* disinfo = gw_districtinfo();
+		switch(disinfo->region)
+		{
+		case -2:
+			sprintf_s(g_statebuffer, 128, "International - District %d", ctx->character->district);
+			break;
+		case 1:
+		case 3:
+		case 4:
+			sprintf_s(g_statebuffer, 128, "%s - District %d", map_regions[disinfo->region], ctx->character->district);
+			break;
+		default:
+			sprintf_s(g_statebuffer, 128, "%s %s - District %d", map_regions[disinfo->region], map_languages[disinfo->language], ctx->character->district);
+			break;
+		}		
+	}
+
+	
+
 	strcpy(g_largeimgkeybuffer, large_imgs[mapinfo->Region > 27 ? 0 : mapinfo->Region]);
 
 	unsigned short encstr[4] = { 0 };
@@ -117,7 +166,7 @@ discord_onjoingame(const char* joinsecret)
 int __stdcall
 gwdiscord_initialize(void* p)
 {
-
+	g_presence.instance = 1;
 	g_presence.state = g_statebuffer;
 	g_presence.details = g_detailbuffer;
 	g_presence.largeImageKey = g_largeimgkeybuffer;
