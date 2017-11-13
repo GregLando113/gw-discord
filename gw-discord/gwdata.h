@@ -255,13 +255,6 @@ struct gwConstAreaInfo
 
 // MsgConn.cpp
 
-struct rc4cipher
-{
-    unsigned x;
-    unsigned y;
-    unsigned char m[256];
-};
-
 typedef int __fastcall gwMsgHandler_t(void* msg);
 
 struct gwCtoSMsgProtocol
@@ -287,9 +280,6 @@ struct gwMsgConn
         gw_array(struct gwCtoSMsgProtocol) ctos;
 		gw_array(struct gwStoCMsgProtocol) stoc;
     } *protocol;
-    char pad2[0x94 - 0xC];
-    struct rc4cipher outbound;
-    struct rc4cipher inbound;
 };
 
 struct gwDistrictInfo

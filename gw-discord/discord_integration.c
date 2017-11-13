@@ -6,13 +6,30 @@
 
 #include "gwdata.h"
 #include "base64.h"
+#include "sha1.h"
 
 #define DISCORD_APP_ID "378706083788881961"
 
 char g_statebuffer[128];
 char g_detailbuffer[128];
-char g_largeimgkeybuffer[128];
+char g_largeimgkeybuffer[32];
+char g_partyid[128];
+char g_joinsecret[128];
 DiscordRichPresence g_presence = { 0 };
+
+unsigned g_partylocalid = 0;
+unsigned g_playerlocalid = 0;
+
+#pragma pack(push,1)
+struct discord_joinsecret
+{
+	unsigned short mapid;
+	unsigned char  district;
+	char           region;
+	unsigned char  language;
+	unsigned char  playerid;
+};
+#pragma pack(pop)
 
 const char* large_imgs[27] = 
 {
@@ -127,7 +144,6 @@ msg33_callback(void* cb)
 		}		
 	}
 
-	
 
 	strcpy(g_largeimgkeybuffer, large_imgs[mapinfo->Region > 27 ? 0 : mapinfo->Region]);
 
@@ -135,8 +151,91 @@ msg33_callback(void* cb)
 	gw_encodestringid(mapinfo->nameid, encstr);
 	gw_decodestringasync(encstr, discord_decodestrcallback, NULL);
 
+	if (g_playerlocalid)
+	{
+		gw_requestjoin(g_playerlocalid);
+		g_playerlocalid = 0;
+	}
+
 end:
 	return oMsg33(cb);
+}
+
+
+gwMsgHandler_t* oMsg462 = 0;
+int __fastcall
+msg462_callback(void* vp)
+{
+	struct __msg462
+	{
+		unsigned op;
+		unsigned localid;
+		unsigned district;
+		unsigned matched;
+		unsigned partysize;
+		unsigned heroes;
+		unsigned type;
+		unsigned hardmode;
+		wchar_t  msg[32];
+		wchar_t name[20];
+	} *p = (struct __msg462*)vp;
+
+	struct gwGameContext* ctx = gw_gamecontext();
+
+	// check player of party search is controlled char
+	if (wcscmp(p->name, ctx->character->playername))
+	{
+		goto end;
+	}
+
+	// make partyid
+	char partyhash[20];
+	SHA1(partyhash, p->msg, sizeof(wchar_t) * (32 + 20));
+	memset(g_partyid, 0, 128);
+	b64_encode(partyhash, 20, g_partyid);
+
+	// make joinsecret
+	struct gwDistrictInfo* dinfo = gw_districtinfo();
+	struct discord_joinsecret secret =
+	{
+		.mapid = ctx->character->currentmapid,
+		.district = ctx->character->district,
+		.region   = dinfo->region,
+		.language = dinfo->language
+	};
+	memset(g_joinsecret, 0, 128);
+	b64_encode(&secret, sizeof(struct discord_joinsecret), g_joinsecret);
+
+	g_partylocalid = p->localid;
+	g_presence.partyId = g_partyid;
+	g_presence.joinSecret = g_joinsecret;
+	g_presence.instance = 1;
+	g_presence.partySize = p->partysize + p->heroes;
+	Discord_UpdatePresence(&g_presence);
+end:
+	return oMsg462(vp);
+}
+
+gwMsgHandler_t* oMsg464 = 0;
+int __fastcall
+msg464_callback(void* vp)
+{
+	struct __msg464
+	{
+		unsigned op;
+		unsigned localid;
+	} *p = (struct __msg464*)vp;
+
+	if (p->localid != g_partylocalid)
+	{
+		goto end;
+	}
+
+	g_presence.partyId = 0;
+	g_presence.joinSecret = 0;
+	Discord_UpdatePresence(&g_presence);
+end:
+	return oMsg464(vp);
 }
 
 void 
@@ -160,7 +259,10 @@ discord_onerrored(int errcode, const char* msg)
 void 
 discord_onjoingame(const char* joinsecret)
 {
-
+	struct discord_joinsecret s;
+	b64_decode(joinsecret, strlen(joinsecret), &s);
+	g_playerlocalid = s.playerid;
+	gw_maptravel(s.mapid, s.region, s.language, s.district);
 }
 
 int __stdcall
@@ -187,12 +289,15 @@ gwdiscord_initialize(void* p)
 
 	Discord_Initialize(DISCORD_APP_ID, &handlers, 1, NULL);
 
-	oMsg33 = gw_setmsghandler(gw_gamesrv(), 23, msg33_callback);
+	oMsg33  = gw_setmsghandler(gw_gamesrv(), 23,  msg33_callback);
+	oMsg462 = gw_setmsghandler(gw_gamesrv(), 462, msg462_callback);
+	oMsg464 = gw_setmsghandler(gw_gamesrv(), 464, msg464_callback);
 }
 
 void 
 gwdiscord_deinitialize(void)
 {
 	gw_setmsghandler(gw_gamesrv(), 23, oMsg33);
+	gw_setmsghandler(gw_gamesrv(), 462, oMsg462);
 	Discord_Shutdown();
 }
