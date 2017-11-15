@@ -194,3 +194,19 @@ gw_districtinfo(void)
 	}
 	return ptr;
 }
+
+struct gwAgent* 
+gw_getagentbyid(unsigned id)
+{
+	struct gwAgent*(__fastcall *__getagentbyid)(unsigned id) = 0;
+
+	if (!__getagentbyid && !scanfor(GW_MODULE_BASE, GW_MODULE_SIZE, 
+		                      "\x56\x8B\xF1\x3B\xF0\x72\x04", 
+		                      "xxxxxxx", 
+		                      -5, 
+		                       0, &__getagentbyid))
+	{
+		return 0;
+	}
+	return __getagentbyid(id);
+}

@@ -9,7 +9,7 @@
 
 struct vec2f
 {
-    float x, y, z;
+    float x, y;
 };
 
 struct vec3f
@@ -170,7 +170,8 @@ struct gwPlayerPartyMember
     /* +h0008 */ unsigned state;
 };
 
-struct gwHeroPartyMember { // total: 0x18/24
+struct gwHeroPartyMember 
+{ // total: 0x18/24
     /* +h0000 */ unsigned agentid;
     /* +h0004 */ unsigned ownerplayerid;
     /* +h0008 */ unsigned heroid;
@@ -179,7 +180,8 @@ struct gwHeroPartyMember { // total: 0x18/24
     /* +h0014 */ unsigned level;
 };
 
-struct gwHenchmanPartyMember { // total: 0x34/52
+struct gwHenchmanPartyMember 
+{ // total: 0x34/52
     /* +h0000 */ unsigned agentid;
     /* +h0004 */ unsigned h0004[10];
     /* +h002C */ unsigned profession;
@@ -252,7 +254,95 @@ struct gwConstAreaInfo
     /* +h0078 */ unsigned descriptionid;
 };
 
-
+struct gwAgent
+{
+	/* +h0000 */ unsigned* vtable;
+	/* +h0004 */ unsigned h0004;
+	/* +h0008 */ unsigned h0008;
+	/* +h000C */ unsigned h000C[4];
+	/* +h001C */ char  link[8];
+	/* +h0024 */ char   link2[8]; // Not used.
+	/* +h002C */ unsigned Id; // AgentId
+	/* +h0030 */ float Z; // Z coord in float
+	/* +h0034 */ float Width1;  // Width of the model's box
+	/* +h0038 */ float Height1; // Height of the model's box
+	/* +h003C */ float Width2;  // Width of the model's box (same as 1)
+	/* +h0040 */ float Height2; // Height of the model's box (same as 1)
+	/* +h0044 */ float Width3;  // Width of the model's box (usually same as 1)
+	/* +h0048 */ float Height3; // Height of the model's box (usually same as 1)
+	/* +h004C */ float Rotation_angle; // Rotation in radians from East (-pi to pi)
+	/* +h0050 */ float Rotation_cos; // cosine of rotation
+	/* +h0054 */ float Rotation_sin; // sine of rotation
+	/* +h0058 */ unsigned NameProperties; // Bitmap basically telling what the agent is
+	/* +h005C */ unsigned char  h005C[8];
+	/* +h0064 */ float h0064;   // weird values, change with movement, always between -1 and 1
+	/* +h0068 */ float h0068;
+	/* +h006C */ float h006C;
+	/* +h0070 */ unsigned char  h0070[4];
+	/* +h0074 */ float X;
+	/* +h0078 */ float Y;
+	/* +h007C */ unsigned plane;
+	/* +h0080 */ unsigned char  h0080[4];
+	/* +h0084 */ float NameTagX; // Exactly the same as X above
+	/* +h0088 */ float NameTagY; // Exactly the same as Y above
+	/* +h008C */ float NameTagZ; // Z coord in float
+	/* +h0090 */ unsigned char  h0090[12];
+	/* +h009C */ unsigned Type; // Livings = 0xDB, Gadgets = 0x200, Items = 0x400.
+	/* +h00A0 */ float MoveX; //If moving, how much on the X axis per second
+	/* +h00A4 */ float MoveY; //If moving, how much on the Y axis per second
+	/* +h00A8 */ unsigned char  h00A8[4]; // always 0?
+	/* +h00AC */ float Rotation_cos2; // same as cosine above
+	/* +h00B0 */ float Rotation_sin2; // same as sine above
+	/* +h00B4 */ unsigned char  h00B4[16];
+	/* +h00C4 */ unsigned Owner;
+	/* +h00C8 */ unsigned ItemID; // Only valid if agent is type 0x400 (item)
+	/* +h00CC */ unsigned char  h00CC[4];
+	/* +h00D0 */ unsigned ExtraType;
+	/* +h00D4 */ unsigned char  h00D4[0xC];
+	/* +h00E0 */ float AnimationType;
+	/* +h00E4 */ unsigned char  h00E4[0x8];
+	/* +h00EC */ float WeaponAttackSpeed; // The base attack speed in float of last attacks weapon. 1.33 = axe, sunsigned short, daggers etc.
+	/* +h00F0 */ float AttackSpeedModifier; // Attack speed modifier of the last attack. 0.67 = 33% increase (1-.33)
+	/* +h00F4 */ unsigned short  PlayerNumber; // Selfexplanatory. All non-players have identifiers for their type. Two of the same mob = same number
+									 //           unsigned short padding;
+	/* +h00F8 */ unsigned char  h00F8[4];
+	/* +h00FC */ unsigned** Equip;
+	/* +h0100 */ unsigned char  h0100[10];
+	/* +h010A */ unsigned char  Primary; // Primary profession 0-10 (None,W,R,Mo,N,Me,E,A,Rt,P,D)
+	/* +h010B */ unsigned char  Secondary; // Secondary profession 0-10 (None,W,R,Mo,N,Me,E,A,Rt,P,D)
+	/* +h010C */ unsigned char  Level; // Duh!
+	/* +h010D */ unsigned char  TeamId; // 0=None, 1=Blue, 2=Red, 3=Yellow
+	/* +h010E */ unsigned char  h010E[14];
+	/* +h011C */ float Energy; // Only works for yourself
+	/* +h0120 */ unsigned MaxEnergy; // Only works for yourself
+	/* +h0124 */ unsigned char  h0124[4];
+	/* +h0128 */ float HPPips; // Regen/degen as float
+	/* +h012C */ unsigned char  h012C[4];
+	/* +h0130 */ float HP; // Health in % where 1=100% and 0=0%
+	/* +h0134 */ unsigned MaxHP; // Only works for agents that have had health floaters above from you and you/heroes
+	/* +h0138 */ unsigned Effects; // Bitmap for effects to display when targetted. DOES include hexes
+	/* +h013C */ unsigned char  h013C[4];
+	/* +h0140 */ unsigned char  Hex; // Bitmap for the hex effect when targetted (apparently obsolete!) (yes)
+	/* +h0141 */ unsigned char  h0141[19];
+	/* +h0154 */ unsigned ModelState; // Different values for different states of the model.
+	/* +h0158 */ unsigned TypeMap; // Odd variable! 0x08 = dead, 0xC00 = boss, 0x40000 = spirit, 0x400000 = player
+	/* +h015C */ unsigned char  h015C[16];
+	/* +h016C */ unsigned InSpiritRange; // Tells if agent is within spirit range of you. Doesn't work anymore?
+	/* +h0170 */ unsigned char  h0170[16];
+	/* +h0180 */ unsigned LoginNumber; // Unique number in instance that only works for players
+	/* +h0184 */ float AnimationSpeed;  // Speed of the current animation
+	/* +h0188 */ unsigned char  AnimationUnk[4]; // related to animations
+	/* +h018C */ unsigned AnimationID;     // Id of the current animation
+	/* +h0190 */ unsigned char  h0190[32];
+	/* +h01B0 */ unsigned char  DaggerStatus; // 0x1 = used lead attack, 0x2 = used offhand attack, 0x3 = used dual attack
+	/* +h01B1 */ unsigned char  Allegiance; // 0x1 = ally/non-attackable, 0x2 = neutral, 0x3 = enemy, 0x4 = spirit/pet, 0x5 = minion, 0x6 = npc/minipet
+	/* +h01B2 */ unsigned short  WeaponType; // 1=bow, 2=axe, 3=hammer, 4=daggers, 5=scythe, 6=spear, 7=sunsigned short, 10=wand, 12=staff, 14=staff
+	/* +h01B4 */ unsigned short  Skill; // 0 = not using a skill. Anything else is the Id of that skill
+	/* +h01B6 */ unsigned short  WeaponItemType;
+	/* +h01B8 */ unsigned short  OffhandItemType;
+	/* +h01BA */ unsigned short  WeaponItemId;
+	/* +h01BC */ unsigned short  OffhandItemId;
+};
 // MsgConn.cpp
 
 typedef int __fastcall gwMsgHandler_t(void* msg);
@@ -297,10 +387,11 @@ struct gwDistrictInfo
 int                     gw_initgamesrv(void);
 
 // data
-struct gwGameContext*   gw_gamecontext(void);
-struct gwConstAreaInfo* gw_areainfo(unsigned mapid);
-struct gwMsgConn*       gw_gamesrv(void);
-struct gwDistrictInfo*  gw_districtinfo(void);
+struct gwGameContext*      gw_gamecontext(void);
+struct gwConstAreaInfo*    gw_areainfo(unsigned mapid);
+struct gwMsgConn*          gw_gamesrv(void);
+struct gwDistrictInfo*     gw_districtinfo(void);
+struct gwAgent*            gw_getagentbyid(unsigned id);
 
 // commands
 void                    gw_maptravel(unsigned mapid, unsigned region, unsigned language, unsigned district);

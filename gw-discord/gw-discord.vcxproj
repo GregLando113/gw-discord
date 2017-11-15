@@ -110,6 +110,7 @@
     <ClCompile Include="gwdata.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="memory.c" />
+    <ClCompile Include="sha1.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\discord-rpc\include\discord-rpc.h" />
@@ -117,6 +118,7 @@
     <ClInclude Include="discord_integration.h" />
     <ClInclude Include="gwdata.h" />
     <ClInclude Include="memory.h" />
+    <ClInclude Include="sha1.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\discord-rpc\lib\discord-rpc.lib" />

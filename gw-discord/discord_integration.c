@@ -19,8 +19,9 @@ DiscordRichPresence g_presence = { 0 };
 
 unsigned g_partylocalid = 0;
 unsigned g_playerlocalid = 0;
+unsigned g_myplayerlocalid = 0;
 
-#pragma pack(push,1)
+
 struct discord_joinsecret
 {
 	unsigned short mapid;
@@ -29,7 +30,6 @@ struct discord_joinsecret
 	unsigned char  language;
 	unsigned char  playerid;
 };
-#pragma pack(pop)
 
 const char* large_imgs[27] = 
 {
@@ -110,6 +110,11 @@ gwMsgHandler_t* oMsg33 = 0;
 int __fastcall 
 msg33_callback(void* cb)
 {
+	struct __msg33
+	{
+		unsigned op;
+		unsigned agid;
+	} *p = cb;
 	struct gwGameContext* ctx = gw_gamecontext();
 	
 	if (!ctx)
@@ -117,7 +122,10 @@ msg33_callback(void* cb)
 
 	unsigned mapid = ctx->character->currentmapid;
 	struct gwConstAreaInfo* mapinfo = gw_areainfo(mapid);
-	
+
+	// get playerid for the instance
+	struct gwAgent* ag = gw_getagentbyid(p->agid);
+	g_myplayerlocalid = ag->LoginNumber;
 
 	g_presence.partyMax = mapinfo->maxpartysize;
 	//g_presence.partySize = getpartysize(ctx);
@@ -178,7 +186,7 @@ msg462_callback(void* vp)
 		unsigned hardmode;
 		wchar_t  msg[32];
 		wchar_t name[20];
-	} *p = (struct __msg462*)vp;
+	} *p = vp;
 
 	struct gwGameContext* ctx = gw_gamecontext();
 
@@ -192,7 +200,7 @@ msg462_callback(void* vp)
 	char partyhash[20];
 	SHA1(partyhash, p->msg, sizeof(wchar_t) * (32 + 20));
 	memset(g_partyid, 0, 128);
-	b64_encode(partyhash, 20, g_partyid);
+	b64_enc(partyhash, 20, g_partyid);
 
 	// make joinsecret
 	struct gwDistrictInfo* dinfo = gw_districtinfo();
@@ -201,10 +209,11 @@ msg462_callback(void* vp)
 		.mapid = ctx->character->currentmapid,
 		.district = ctx->character->district,
 		.region   = dinfo->region,
-		.language = dinfo->language
+		.language = dinfo->language,
+		.playerid = g_myplayerlocalid
 	};
 	memset(g_joinsecret, 0, 128);
-	b64_encode(&secret, sizeof(struct discord_joinsecret), g_joinsecret);
+	b64_enc(&secret, sizeof(struct discord_joinsecret), g_joinsecret);
 
 	g_partylocalid = p->localid;
 	g_presence.partyId = g_partyid;
@@ -260,7 +269,7 @@ void
 discord_onjoingame(const char* joinsecret)
 {
 	struct discord_joinsecret s;
-	b64_decode(joinsecret, strlen(joinsecret), &s);
+	b64_dec(joinsecret, &s);
 	g_playerlocalid = s.playerid;
 	gw_maptravel(s.mapid, s.region, s.language, s.district);
 }
