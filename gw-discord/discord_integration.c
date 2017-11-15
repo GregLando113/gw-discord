@@ -3,6 +3,7 @@
 #include <discord-rpc.h>
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#include <stdio.h>
 
 #include "gwdata.h"
 #include "base64.h"
@@ -85,7 +86,6 @@ const char* map_languages[] =
 	"Polish",
 	"Russian"
 };
-
 
 void __fastcall 
 discord_decodestrcallback(void* data, wchar_t* str)
@@ -215,11 +215,27 @@ msg462_callback(void* vp)
 	memset(g_joinsecret, 0, 128);
 	b64_enc(&secret, sizeof(struct discord_joinsecret), g_joinsecret);
 
+	struct gwDistrictInfo* disinfo = gw_districtinfo();
+	switch (disinfo->region)
+	{
+	case -2:
+		sprintf_s(g_statebuffer, 128, "International - District %d\n%S", ctx->character->district, p->msg);
+		break;
+	case 1:
+	case 3:
+	case 4:
+		sprintf_s(g_statebuffer, 128, "%s - District %d\n%S", map_regions[disinfo->region], ctx->character->district, p->msg);
+		break;
+	default:
+		sprintf_s(g_statebuffer, 128, "%s %s - District %d\n%S", map_regions[disinfo->region], map_languages[disinfo->language], ctx->character->district, p->msg);
+		break;
+	}
+
 	g_partylocalid = p->localid;
 	g_presence.partyId = g_partyid;
 	g_presence.joinSecret = g_joinsecret;
 	g_presence.instance = 1;
-	g_presence.partySize = p->partysize + p->heroes;
+	g_presence.partySize = p->partysize;
 	Discord_UpdatePresence(&g_presence);
 end:
 	return oMsg462(vp);
@@ -240,8 +256,26 @@ msg464_callback(void* vp)
 		goto end;
 	}
 
+	struct gwGameContext*  ctx = gw_gamecontext();
+	struct gwDistrictInfo* disinfo = gw_districtinfo();
+	switch (disinfo->region)
+	{
+	case -2:
+		sprintf_s(g_statebuffer, 128, "International - District %d", ctx->character->district);
+		break;
+	case 1:
+	case 3:
+	case 4:
+		sprintf_s(g_statebuffer, 128, "%s - District %d", map_regions[disinfo->region], ctx->character->district);
+		break;
+	default:
+		sprintf_s(g_statebuffer, 128, "%s %s - District %d", map_regions[disinfo->region], map_languages[disinfo->language], ctx->character->district);
+		break;
+	}
+
 	g_presence.partyId = 0;
 	g_presence.joinSecret = 0;
+	g_presence.partySize = 0;
 	Discord_UpdatePresence(&g_presence);
 end:
 	return oMsg464(vp);
@@ -250,19 +284,16 @@ end:
 void 
 discord_onready(void)
 {
-
 }
 
 void 
 discord_ondisconnected(int errcode, const char* msg)
 {
-
 }
 
 void 
 discord_onerrored(int errcode, const char* msg)
 {
-
 }
 
 void 
@@ -285,8 +316,8 @@ gwdiscord_initialize(void* p)
 	DiscordEventHandlers handlers;
 	memset(&handlers, 0, sizeof(handlers));
 	handlers.ready        = discord_onready;
-	handlers.errored      = discord_ondisconnected;
-	handlers.disconnected = discord_onerrored;
+	handlers.errored      = discord_onerrored;
+	handlers.disconnected = discord_ondisconnected;
 	handlers.joinGame     = discord_onjoingame;
 
 	gw_initgamesrv();
@@ -301,6 +332,12 @@ gwdiscord_initialize(void* p)
 	oMsg33  = gw_setmsghandler(gw_gamesrv(), 23,  msg33_callback);
 	oMsg462 = gw_setmsghandler(gw_gamesrv(), 462, msg462_callback);
 	oMsg464 = gw_setmsghandler(gw_gamesrv(), 464, msg464_callback);
+
+	while (1)
+	{
+		Discord_RunCallbacks();
+		Sleep(32);
+	}
 }
 
 void 

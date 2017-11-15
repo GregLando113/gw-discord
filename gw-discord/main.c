@@ -2,7 +2,7 @@
 
 #include "discord_integration.h"
 
-
+#include <stdio.h>
 
 
 
