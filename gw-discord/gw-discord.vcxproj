@@ -83,7 +83,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" "C:\GW\GW1\plugins\gw-discord.dll"</Command>
+      <Command>copy "$(TargetPath)" "C:\GW\GW1\bin\gw-discord.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -101,7 +101,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetPath)" "C:\GW\GW1\plugins\gw-discord.dll"</Command>
+      <Command>copy "$(TargetPath)" "C:\GW\GW1\bin\gw-discord.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

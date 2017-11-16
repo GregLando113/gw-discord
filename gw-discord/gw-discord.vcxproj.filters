@@ -30,6 +30,9 @@
     <ClCompile Include="base64.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sha1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="discord_integration.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="base64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sha1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

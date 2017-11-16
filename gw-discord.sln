@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gw-discord", "gw-discord\gw-discord.vcxproj", "{C451980F-458E-420B-8E35-53E542BA0160}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CA83DDAA-F9AD-4341-9654-44E5B4DB3185} = {CA83DDAA-F9AD-4341-9654-44E5B4DB3185}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gw-loader", "gw-loader\gw-loader.vcxproj", "{CA83DDAA-F9AD-4341-9654-44E5B4DB3185}"
 EndProject

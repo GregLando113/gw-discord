@@ -106,14 +106,15 @@ getpartysize(struct gwGameContext* ctx)
 	return p->players.size + p->heroes.size + p->henchmen.size;
 }
 
-gwMsgHandler_t* oMsg33 = 0;
+gwMsgHandler_t* oMsg23 = 0;
 int __fastcall 
-msg33_callback(void* cb)
+msg23_callback(void* cb)
 {
 	struct __msg33
 	{
 		unsigned op;
 		unsigned agid;
+		unsigned unk1;
 	} *p = cb;
 	struct gwGameContext* ctx = gw_gamecontext();
 	
@@ -125,10 +126,12 @@ msg33_callback(void* cb)
 
 	// get playerid for the instance
 	struct gwAgent* ag = gw_getagentbyid(p->agid);
-	g_myplayerlocalid = ag->LoginNumber;
-
+	if (ag)
+	{
+		g_myplayerlocalid = ag->LoginNumber;
+	}
 	g_presence.partyMax = mapinfo->maxpartysize;
-	//g_presence.partySize = getpartysize(ctx);
+
 	if (ctx->character->is_explorable)
 	{
 		strcpy(g_statebuffer, "In Explorable");
@@ -166,7 +169,7 @@ msg33_callback(void* cb)
 	}
 
 end:
-	return oMsg33(cb);
+	return oMsg23(cb);
 }
 
 
@@ -215,6 +218,7 @@ msg462_callback(void* vp)
 	memset(g_joinsecret, 0, 128);
 	b64_enc(&secret, sizeof(struct discord_joinsecret), g_joinsecret);
 
+	// update discord with party search description
 	struct gwDistrictInfo* disinfo = gw_districtinfo();
 	switch (disinfo->region)
 	{
@@ -251,11 +255,14 @@ msg464_callback(void* vp)
 		unsigned localid;
 	} *p = (struct __msg464*)vp;
 
+	// msg must be about players party
 	if (p->localid != g_partylocalid)
 	{
 		goto end;
 	}
+	g_partylocalid = 0;
 
+	// update discord without party search description
 	struct gwGameContext*  ctx = gw_gamecontext();
 	struct gwDistrictInfo* disinfo = gw_districtinfo();
 	switch (disinfo->region)
@@ -273,6 +280,7 @@ msg464_callback(void* vp)
 		break;
 	}
 
+	// clear party from discord
 	g_presence.partyId = 0;
 	g_presence.joinSecret = 0;
 	g_presence.partySize = 0;
@@ -329,7 +337,7 @@ gwdiscord_initialize(void* p)
 
 	Discord_Initialize(DISCORD_APP_ID, &handlers, 1, NULL);
 
-	oMsg33  = gw_setmsghandler(gw_gamesrv(), 23,  msg33_callback);
+	oMsg23  = gw_setmsghandler(gw_gamesrv(), 23,  msg23_callback);
 	oMsg462 = gw_setmsghandler(gw_gamesrv(), 462, msg462_callback);
 	oMsg464 = gw_setmsghandler(gw_gamesrv(), 464, msg464_callback);
 
@@ -343,7 +351,7 @@ gwdiscord_initialize(void* p)
 void 
 gwdiscord_deinitialize(void)
 {
-	gw_setmsghandler(gw_gamesrv(), 23, oMsg33);
+	gw_setmsghandler(gw_gamesrv(), 23,  oMsg23);
 	gw_setmsghandler(gw_gamesrv(), 462, oMsg462);
 	Discord_Shutdown();
 }
