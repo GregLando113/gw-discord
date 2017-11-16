@@ -323,6 +323,48 @@ end:
 	return oMsg164(vp);
 }
 
+gwMsgHandler_t* oMsg429 = 0;
+int __fastcall msg429_callback(void* vp) // instance change error
+{
+	enum
+	{
+		kInstError_CannotEnterOutpost = 0x35,
+		kInstError_InActiveDistrict = 0x3c
+	};
+
+	struct __msg429
+	{
+		unsigned op;
+		unsigned errcode;
+	} *p = vp;
+
+
+	switch (p->errcode)
+	{
+	case kInstError_CannotEnterOutpost:
+	{
+		if (g_playerlocalid)
+		{
+			g_playerlocalid = 0;
+			g_presence.partyId = 0;
+		}
+	}
+	break;
+	case kInstError_InActiveDistrict:
+	{
+		if (g_playerlocalid)
+		{
+			gw_requestjoin(g_playerlocalid);
+			g_playerlocalid = 0;
+		}
+	}
+	break;
+	}
+
+end:
+	return oMsg429(vp);
+}
+
 void 
 discord_onready(void)
 {
@@ -379,6 +421,7 @@ gwdiscord_initialize(void* p)
 	oMsg462 = gw_setmsghandler(gw_gamesrv(), 462, msg462_callback);
 	oMsg464 = gw_setmsghandler(gw_gamesrv(), 464, msg464_callback);
 	oMsg164 = gw_setmsghandler(gw_gamesrv(), 164, msg164_callback);
+	oMsg429 = gw_setmsghandler(gw_gamesrv(), 429, msg429_callback);
 
 	while (g_state & kState_Active)
 	{
@@ -394,6 +437,7 @@ gwdiscord_deinitialize(void)
 	gw_setmsghandler(gw_gamesrv(), 462, oMsg462);
 	gw_setmsghandler(gw_gamesrv(), 464, oMsg464);
 	gw_setmsghandler(gw_gamesrv(), 164, oMsg164);
+	gw_setmsghandler(gw_gamesrv(), 429, oMsg429);
 	g_state &= ~kState_Active;
 	Discord_Shutdown();
 }
