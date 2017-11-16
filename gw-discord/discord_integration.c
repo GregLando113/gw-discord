@@ -23,6 +23,15 @@ unsigned g_playerlocalid = 0;
 unsigned g_myplayerlocalid = 0;
 
 
+
+enum
+{
+	kState_Active = 1 << 0
+};
+
+unsigned g_state = 0;
+
+
 struct discord_joinsecret
 {
 	unsigned short mapid;
@@ -30,6 +39,7 @@ struct discord_joinsecret
 	char           region;
 	unsigned char  language;
 	unsigned char  playerid;
+	char           partyid[20];
 };
 
 const char* large_imgs[27] = 
@@ -108,7 +118,7 @@ getpartysize(struct gwGameContext* ctx)
 
 gwMsgHandler_t* oMsg23 = 0;
 int __fastcall 
-msg23_callback(void* cb)
+msg23_callback(void* cb) // set controlled character (used for map change load)
 {
 	struct __msg33
 	{
@@ -175,7 +185,7 @@ end:
 
 gwMsgHandler_t* oMsg462 = 0;
 int __fastcall
-msg462_callback(void* vp)
+msg462_callback(void* vp) // party search create
 {
 	struct __msg462
 	{
@@ -215,6 +225,7 @@ msg462_callback(void* vp)
 		.language = dinfo->language,
 		.playerid = g_myplayerlocalid
 	};
+	memcpy(secret.partyid, partyhash, 20);
 	memset(g_joinsecret, 0, 128);
 	b64_enc(&secret, sizeof(struct discord_joinsecret), g_joinsecret);
 
@@ -247,7 +258,7 @@ end:
 
 gwMsgHandler_t* oMsg464 = 0;
 int __fastcall
-msg464_callback(void* vp)
+msg464_callback(void* vp) // party search remove
 {
 	struct __msg464
 	{
@@ -289,6 +300,29 @@ end:
 	return oMsg464(vp);
 }
 
+gwMsgHandler_t* oMsg164 = 0;
+int __fastcall msg164_callback(void* vp) // set player party size
+{
+	struct __msg164
+	{
+		unsigned op;
+		unsigned playerid;
+		unsigned size;
+	} *p = vp;
+
+	// we only care about our party
+	if (p->playerid != g_partylocalid)
+	{
+		goto end;
+	}
+
+	g_presence.partySize = p->size;
+
+	Discord_UpdatePresence(&g_presence);
+end:
+	return oMsg164(vp);
+}
+
 void 
 discord_onready(void)
 {
@@ -310,6 +344,9 @@ discord_onjoingame(const char* joinsecret)
 	struct discord_joinsecret s;
 	b64_dec(joinsecret, &s);
 	g_playerlocalid = s.playerid;
+	b64_enc(s.partyid, 20, g_partyid);
+	g_presence.partyId = g_partyid;
+	Discord_UpdatePresence(&g_presence);
 	gw_maptravel(s.mapid, s.region, s.language, s.district);
 }
 
@@ -320,6 +357,7 @@ gwdiscord_initialize(void* p)
 	g_presence.state = g_statebuffer;
 	g_presence.details = g_detailbuffer;
 	g_presence.largeImageKey = g_largeimgkeybuffer;
+	g_state |= kState_Active;
 
 	DiscordEventHandlers handlers;
 	memset(&handlers, 0, sizeof(handlers));
@@ -340,8 +378,9 @@ gwdiscord_initialize(void* p)
 	oMsg23  = gw_setmsghandler(gw_gamesrv(), 23,  msg23_callback);
 	oMsg462 = gw_setmsghandler(gw_gamesrv(), 462, msg462_callback);
 	oMsg464 = gw_setmsghandler(gw_gamesrv(), 464, msg464_callback);
+	oMsg164 = gw_setmsghandler(gw_gamesrv(), 164, msg164_callback);
 
-	while (1)
+	while (g_state & kState_Active)
 	{
 		Discord_RunCallbacks();
 		Sleep(32);
@@ -353,5 +392,8 @@ gwdiscord_deinitialize(void)
 {
 	gw_setmsghandler(gw_gamesrv(), 23,  oMsg23);
 	gw_setmsghandler(gw_gamesrv(), 462, oMsg462);
+	gw_setmsghandler(gw_gamesrv(), 464, oMsg464);
+	gw_setmsghandler(gw_gamesrv(), 164, oMsg164);
+	g_state &= ~kState_Active;
 	Discord_Shutdown();
 }
