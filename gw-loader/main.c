@@ -14,7 +14,8 @@ extern "C" {
 #define DBG(fmt,...)
 #endif
 
-#define DLL_DIR_FIND "bin\\"
+#define DLL_DIR_FIND  TEXT("bin\\")
+#define D3D_CHAIN_DLL TEXT("d3d9-chain.dll")
 
 struct IDirect3D9;
 struct IDirect3DDevice9;
@@ -50,8 +51,9 @@ typedef DWORD D3DCOLOR;
 typedef struct IDirect3D9* WINAPI Direct3DCreate9_t(UINT);
 typedef HRESULT WINAPI Direct3DCreate9Ex_t(UINT, struct IDirect3D9Ex**);
 
-HANDLE g_d3d9dll;
+HMODULE g_d3d9dll;
 unsigned g_dllcount = 0;
+HMODULE g_d3dchaindll = 0;
 
 static void LoadAllDlls(void)
 {
@@ -70,6 +72,7 @@ static void LoadAllDlls(void)
 		g_dllcount++;
 		DBG("Loaded %s...\n", path);
 	} while (FindNextFile(fh, &fdata));
+	g_d3dchaindll = LoadLibrary(D3D_CHAIN_DLL);
 }
 
 
@@ -112,8 +115,8 @@ struct IDirect3D9* WINAPI Direct3DCreate9(
 
 	LoadAllDlls();
 
-	if (hD3D && !_imp_Direct3DCreate9) {
-		_imp_Direct3DCreate9 = (Direct3DCreate9_t*)GetProcAddress(hD3D, "Direct3DCreate9");
+	if (hD3D && !g_d3dchaindll && !_imp_Direct3DCreate9) {
+		_imp_Direct3DCreate9 = (Direct3DCreate9_t*)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "Direct3DCreate9");
 	}
 
 	if (_imp_Direct3DCreate9)
@@ -134,8 +137,8 @@ HRESULT WINAPI Direct3DCreate9Ex(
 
 	LoadAllDlls();
 
-	if (hD3D && !_imp_Direct3DCreate9Ex) {
-		_imp_Direct3DCreate9Ex = (Direct3DCreate9Ex_t*)GetProcAddress(hD3D, "Direct3DCreate9Ex");
+	if (hD3D && !g_d3dchaindll && !_imp_Direct3DCreate9Ex) {
+		_imp_Direct3DCreate9Ex = (Direct3DCreate9Ex_t*)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "Direct3DCreate9Ex");
 	}
 
 	if (_imp_Direct3DCreate9Ex)
@@ -154,7 +157,7 @@ int WINAPI D3DPERF_BeginEvent(D3DCOLOR col, LPCWSTR wszName)
 	LoadAllDlls();
 
 	if (hD3D && !_imp_BeginEvent)
-		_imp_BeginEvent = (BeginEvent_t)GetProcAddress(hD3D, "D3DPERF_BeginEvent");
+		_imp_BeginEvent = (BeginEvent_t)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "D3DPERF_BeginEvent");
 
 	if (_imp_BeginEvent)
 		return _imp_BeginEvent(col, wszName);
@@ -172,7 +175,7 @@ int WINAPI D3DPERF_EndEvent(void)
 	LoadAllDlls();
 
 	if (hD3D && !_imp_EndEvent)
-		_imp_EndEvent = (EndEvent_t)GetProcAddress(hD3D, "D3DPERF_EndEvent");
+		_imp_EndEvent = (EndEvent_t)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "D3DPERF_EndEvent");
 
 	if (_imp_EndEvent)
 		return _imp_EndEvent();
@@ -190,7 +193,7 @@ void WINAPI D3DPERF_SetMarker(D3DCOLOR col, LPCWSTR wszName)
 	LoadAllDlls();
 
 	if (hD3D && !_imp_SetMarker)
-		_imp_SetMarker = (Direct3DSet_t)GetProcAddress(hD3D, "D3DPERF_SetMarker");
+		_imp_SetMarker = (Direct3DSet_t)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "D3DPERF_SetMarker");
 
 	if (_imp_SetMarker)
 		_imp_SetMarker(col, wszName);
@@ -206,7 +209,7 @@ void WINAPI D3DPERF_SetRegion(D3DCOLOR col, LPCWSTR wszName)
 	LoadAllDlls();
 
 	if (hD3D && !_imp_SetRegion)
-		_imp_SetRegion = (Direct3DSet_t)GetProcAddress(hD3D, "D3DPERF_SetRegion");
+		_imp_SetRegion = (Direct3DSet_t)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "D3DPERF_SetRegion");
 
 	if (_imp_SetRegion)
 		_imp_SetRegion(col, wszName);
