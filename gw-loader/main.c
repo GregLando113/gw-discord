@@ -37,13 +37,12 @@ struct IDirect3DQuery9;
 
 #define _FACD3D  0x876
 #define MAKE_D3DHRESULT( code )  MAKE_HRESULT( 1, _FACD3D, code )
-#define MAKE_D3DSTATUS( code )  MAKE_HRESULT( 0, _FACD3D, code )
 
 /*
 * Direct3D Errors
 */
 #define D3D_OK                              S_OK
-#define D3DERR_NOTAVAILABLE                     MAKE_D3DHRESULT(2154)
+#define D3DERR_NOTAVAILABLE                 MAKE_D3DHRESULT(2154)
 
 typedef DWORD D3DCOLOR;
 
@@ -216,7 +215,7 @@ void WINAPI D3DPERF_SetRegion(D3DCOLOR col, LPCWSTR wszName)
 }
 
 __declspec(dllexport)
-	BOOL WINAPI D3DPERF_QueryRepeatFrame(void)
+BOOL WINAPI D3DPERF_QueryRepeatFrame(void)
 {
 	typedef BOOL(WINAPI* QueryRepeatFrame_t)(void);
 	static QueryRepeatFrame_t _imp_QueryRepeatFrame = NULL;
@@ -234,7 +233,7 @@ __declspec(dllexport)
 }
 
 __declspec(dllexport)
-	void WINAPI D3DPERF_SetOptions(DWORD dwOptions)
+void WINAPI D3DPERF_SetOptions(DWORD dwOptions)
 {
 	typedef void (WINAPI* SetOptions_t)(DWORD);
 	static SetOptions_t _imp_SetOptions = NULL;
@@ -248,7 +247,7 @@ __declspec(dllexport)
 }
 
 __declspec(dllexport)
-	DWORD WINAPI D3DPERF_GetStatus(void)
+DWORD WINAPI D3DPERF_GetStatus(void)
 {
 	typedef DWORD(WINAPI* GetStatus_t)(void);
 	static GetStatus_t _imp_GetStatus = NULL;
