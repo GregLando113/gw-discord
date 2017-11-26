@@ -114,7 +114,7 @@ struct IDirect3D9* WINAPI Direct3DCreate9(
 
 	LoadAllDlls();
 
-	if (hD3D && !g_d3dchaindll && !_imp_Direct3DCreate9) {
+	if ((g_d3dchaindll || hD3D) && !_imp_Direct3DCreate9) {
 		_imp_Direct3DCreate9 = (Direct3DCreate9_t*)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "Direct3DCreate9");
 	}
 
@@ -136,7 +136,7 @@ HRESULT WINAPI Direct3DCreate9Ex(
 
 	LoadAllDlls();
 
-	if (hD3D && !g_d3dchaindll && !_imp_Direct3DCreate9Ex) {
+	if ((g_d3dchaindll || hD3D) && !_imp_Direct3DCreate9Ex) {
 		_imp_Direct3DCreate9Ex = (Direct3DCreate9Ex_t*)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "Direct3DCreate9Ex");
 	}
 
@@ -191,7 +191,7 @@ void WINAPI D3DPERF_SetMarker(D3DCOLOR col, LPCWSTR wszName)
 
 	LoadAllDlls();
 
-	if (hD3D && !_imp_SetMarker)
+	if ((g_d3dchaindll || hD3D) && !_imp_SetMarker)
 		_imp_SetMarker = (Direct3DSet_t)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "D3DPERF_SetMarker");
 
 	if (_imp_SetMarker)
@@ -207,7 +207,7 @@ void WINAPI D3DPERF_SetRegion(D3DCOLOR col, LPCWSTR wszName)
 
 	LoadAllDlls();
 
-	if (hD3D && !_imp_SetRegion)
+	if ((g_d3dchaindll || hD3D) && !_imp_SetRegion)
 		_imp_SetRegion = (Direct3DSet_t)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "D3DPERF_SetRegion");
 
 	if (_imp_SetRegion)
@@ -223,8 +223,8 @@ BOOL WINAPI D3DPERF_QueryRepeatFrame(void)
 
 	LoadAllDlls();
 
-	if (hD3D && !_imp_QueryRepeatFrame)
-		_imp_QueryRepeatFrame = (QueryRepeatFrame_t)GetProcAddress(hD3D, "D3DPERF_QueryRepeatFrame");
+	if ((g_d3dchaindll || hD3D) && !_imp_QueryRepeatFrame)
+		_imp_QueryRepeatFrame = (QueryRepeatFrame_t)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "D3DPERF_QueryRepeatFrame");
 
 	if (_imp_QueryRepeatFrame)
 		return _imp_QueryRepeatFrame();
@@ -239,8 +239,8 @@ void WINAPI D3DPERF_SetOptions(DWORD dwOptions)
 	static SetOptions_t _imp_SetOptions = NULL;
 	HANDLE hD3D = LoadD3D9();
 
-	if (hD3D && !_imp_SetOptions)
-		_imp_SetOptions = (SetOptions_t)GetProcAddress(hD3D, "D3DPERF_SetOptions");
+	if ((g_d3dchaindll || hD3D) && !_imp_SetOptions)
+		_imp_SetOptions = (SetOptions_t)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "D3DPERF_SetOptions");
 
 	if (_imp_SetOptions)
 		_imp_SetOptions(dwOptions);
@@ -253,8 +253,8 @@ DWORD WINAPI D3DPERF_GetStatus(void)
 	static GetStatus_t _imp_GetStatus = NULL;
 	HANDLE hD3D = LoadD3D9();
 
-	if (hD3D && !_imp_GetStatus)
-		_imp_GetStatus = (GetStatus_t)GetProcAddress(hD3D, "D3DPERF_GetStatus");
+	if ((g_d3dchaindll || hD3D) && !_imp_GetStatus)
+		_imp_GetStatus = (GetStatus_t)GetProcAddress(g_d3dchaindll ? g_d3dchaindll : hD3D, "D3DPERF_GetStatus");
 
 	if (_imp_GetStatus)
 		return _imp_GetStatus();
