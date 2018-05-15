@@ -113,10 +113,11 @@
     <ClCompile Include="sha1.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\discord-rpc\include\discord-rpc.h" />
+    <ClInclude Include="..\discord-rpc\include\discord_rpc.h" />
     <ClInclude Include="base64.h" />
     <ClInclude Include="discord_integration.h" />
     <ClInclude Include="gwdata.h" />
+    <ClInclude Include="gwgui.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="sha1.h" />
   </ItemGroup>

@@ -1,6 +1,6 @@
 #include "discord_integration.h"
 
-#include <discord-rpc.h>
+#include <discord_rpc.h>
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <stdio.h>
@@ -116,9 +116,9 @@ getpartysize(struct gwGameContext* ctx)
 	return p->players.size + p->heroes.size + p->henchmen.size;
 }
 
-gwMsgHandler_t* oMsg23 = 0;
+gwMsgHandler_t* oSetControlledCharacter = 0;
 int __fastcall 
-msg23_callback(void* cb) // set controlled character (used for map change load)
+hkMsgSetControlledCharacter(void* cb) // set controlled character (used for map change load)
 {
 	struct __msg33
 	{
@@ -179,13 +179,13 @@ msg23_callback(void* cb) // set controlled character (used for map change load)
 	}
 
 end:
-	return oMsg23(cb);
+	return oSetControlledCharacter(cb);
 }
 
 
-gwMsgHandler_t* oMsg462 = 0;
+gwMsgHandler_t* oMsgPartySearchCreate = 0;
 int __fastcall
-msg462_callback(void* vp) // party search create
+hkMsgPartySearchCreate(void* vp) // party search create
 {
 	struct __msg462
 	{
@@ -253,12 +253,12 @@ msg462_callback(void* vp) // party search create
 	g_presence.partySize = p->partysize;
 	Discord_UpdatePresence(&g_presence);
 end:
-	return oMsg462(vp);
+	return oMsgPartySearchCreate(vp);
 }
 
-gwMsgHandler_t* oMsg464 = 0;
+gwMsgHandler_t* oMsgPartySearchDelete = 0;
 int __fastcall
-msg464_callback(void* vp) // party search remove
+hkMsgPartySearchDelete(void* vp) // party search remove
 {
 	struct __msg464
 	{
@@ -297,11 +297,11 @@ msg464_callback(void* vp) // party search remove
 	g_presence.partySize = 0;
 	Discord_UpdatePresence(&g_presence);
 end:
-	return oMsg464(vp);
+	return oMsgPartySearchDelete(vp);
 }
 
-gwMsgHandler_t* oMsg164 = 0;
-int __fastcall msg164_callback(void* vp) // set player party size
+gwMsgHandler_t* oMsgPartySize = 0;
+int __fastcall hkMsgPartySize(void* vp) // set player party size
 {
 	struct __msg164
 	{
@@ -320,11 +320,11 @@ int __fastcall msg164_callback(void* vp) // set player party size
 
 	Discord_UpdatePresence(&g_presence);
 end:
-	return oMsg164(vp);
+	return oMsgPartySize(vp);
 }
 
-gwMsgHandler_t* oMsg429 = 0;
-int __fastcall msg429_callback(void* vp) // instance change error
+gwMsgHandler_t* oMsgInstanceChangeError = 0;
+int __fastcall hkMsgInstanceChangeError(void* vp) // instance change error
 {
 	enum
 	{
@@ -362,7 +362,7 @@ int __fastcall msg429_callback(void* vp) // instance change error
 	}
 
 end:
-	return oMsg429(vp);
+	return oMsgInstanceChangeError(vp);
 }
 
 void 
@@ -417,15 +417,19 @@ gwdiscord_initialize(void* p)
 
 	Discord_Initialize(DISCORD_APP_ID, &handlers, 1, NULL);
 
-	oMsg23  = gw_setmsghandler(gw_gamesrv(), 23,  msg23_callback);
-	oMsg462 = gw_setmsghandler(gw_gamesrv(), 462, msg462_callback);
-	oMsg464 = gw_setmsghandler(gw_gamesrv(), 464, msg464_callback);
-	oMsg164 = gw_setmsghandler(gw_gamesrv(), 164, msg164_callback);
-	oMsg429 = gw_setmsghandler(gw_gamesrv(), 429, msg429_callback);
+	oSetControlledCharacter  = gw_setmsghandler(gw_gamesrv(), 35,  hkMsgSetControlledCharacter);
+	oMsgPartySearchCreate = gw_setmsghandler(gw_gamesrv(), 475, hkMsgPartySearchCreate);
+	oMsgPartySearchDelete = gw_setmsghandler(gw_gamesrv(), 477, hkMsgPartySearchDelete);
+	oMsgPartySize = gw_setmsghandler(gw_gamesrv(), 177, hkMsgPartySize);
+	oMsgInstanceChangeError = gw_setmsghandler(gw_gamesrv(), 442, hkMsgInstanceChangeError);
 
 	while (g_state & kState_Active)
 	{
 		Discord_RunCallbacks();
+		if (GetAsyncKeyState(VK_INSERT) & 1)
+		{
+
+		}
 		Sleep(32);
 	}
 }
@@ -433,11 +437,11 @@ gwdiscord_initialize(void* p)
 void 
 gwdiscord_deinitialize(void)
 {
-	gw_setmsghandler(gw_gamesrv(), 23,  oMsg23);
-	gw_setmsghandler(gw_gamesrv(), 462, oMsg462);
-	gw_setmsghandler(gw_gamesrv(), 464, oMsg464);
-	gw_setmsghandler(gw_gamesrv(), 164, oMsg164);
-	gw_setmsghandler(gw_gamesrv(), 429, oMsg429);
+	gw_setmsghandler(gw_gamesrv(), 35,  oSetControlledCharacter);
+	gw_setmsghandler(gw_gamesrv(), 475, oMsgPartySearchCreate);
+	gw_setmsghandler(gw_gamesrv(), 477, oMsgPartySearchDelete);
+	gw_setmsghandler(gw_gamesrv(), 177, oMsgPartySize);
+	gw_setmsghandler(gw_gamesrv(), 442, oMsgInstanceChangeError);
 	g_state &= ~kState_Active;
 	Discord_Shutdown();
 }

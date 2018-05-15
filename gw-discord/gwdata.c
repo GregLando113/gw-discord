@@ -91,7 +91,7 @@ gw_maptravel(unsigned mapid, unsigned region, unsigned language, unsigned distri
 	}
 
 	struct __msg00AB msg = {
-		.op       = 0x00AB,
+		.op       = 0x00B5,
 		.mapid    = mapid,
 		.region   = region,
 		.district = district,
@@ -116,7 +116,7 @@ gw_requestjoin(unsigned playerid)
 		return;
 	}
     struct __msg009A msg = {
-		.op       = 0x009A,
+		.op       = 0x00A4,
 		.playerid = playerid
 	};
 
